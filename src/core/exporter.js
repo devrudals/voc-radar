@@ -89,10 +89,10 @@ export function exportToCSV(report) {
 export function exportToMarkdown(report) {
   if (!report || report.status !== 'SUCCESS') return '';
 
-  let md = `# 📊 VOCRadar Intelligence Report\n\n`;
+  let md = `# VOCRadar Executive Intelligence Report\n\n`;
   md += `> **분석 모수:** ${report.totalReviews}개 리뷰 | **진입 기회 지수 (Opportunity Score):** **${report.opportunityScore}/100** (${report.opportunityLevel})\n\n`;
   
-  md += `## 🚨 1. 치명적 결함 TOP (제조/소싱 시 개선 필수)\n`;
+  md += `## 1. 치명적 결함 TOP (제조/소싱 시 개선 필수)\n`;
   report.fatalFlaws.forEach((flaw, idx) => {
     md += `${idx + 1}. **${flaw.category}** - 불만율 ${flaw.percentage}% (${flaw.count}건) [심각도: ${flaw.severity}]\n`;
     if (flaw.evidenceQuotes && flaw.evidenceQuotes.length > 0) {
@@ -100,17 +100,17 @@ export function exportToMarkdown(report) {
     }
   });
 
-  md += `\n## 💡 2. 고객들이 애타게 찾는 기능 (차별화 포인트)\n`;
+  md += `\n## 2. 고객들이 애타게 찾는 기능 (차별화 포인트)\n`;
   report.unmetDesires.forEach((d, idx) => {
     md += `${idx + 1}. *" ${d.desire} "*\n`;
   });
 
-  md += `\n## 🎯 3. 고효율 광고 카피 앵글 (상세페이지 & 광고 활용)\n`;
+  md += `\n## 3. 고효율 광고 카피 앵글 (상세페이지 & 광고 활용)\n`;
   report.adAngles.forEach((a, idx) => {
-    md += `${idx + 1}. **Hook:** "${a.hook}"\n   👉 추천 카피: *${a.recommendedAdCopy}*\n`;
+    md += `${idx + 1}. **Hook:** "${a.hook}"\n   - 추천 카피: *${a.recommendedAdCopy}*\n`;
   });
 
-  md += `\n## 🛠️ 4. 공장/제조사 전달용 스펙 개선 체크리스트\n`;
+  md += `\n## 4. 공장/제조사 전달용 스펙 개선 체크리스트\n`;
   report.actionableChecklist.forEach(item => {
     md += `- [ ] [${item.priority}] ${item.action}\n`;
   });

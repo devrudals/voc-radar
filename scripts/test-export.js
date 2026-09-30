@@ -21,7 +21,7 @@ assert.ok(csv.includes('Opportunity Score'), 'CSV should contain Opportunity sco
 
 // 2. Markdown Generation Test
 const md = exportToMarkdown(report);
-assert.ok(md.includes('# 📊 VOCRadar Intelligence Report'), 'Markdown should contain title');
+assert.ok(md.includes('VOCRadar Executive Intelligence Report') || md.includes('VOCRadar Intelligence Report'), 'Markdown should contain title');
 assert.ok(md.includes('치명적 결함 TOP'), 'Markdown should contain flaws section');
 assert.ok(md.includes('공장/제조사 전달용 스펙 개선'), 'Markdown should contain factory checklist');
 

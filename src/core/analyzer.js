@@ -9,8 +9,8 @@ import { stripHTML, escapeHTML } from './sanitize.js';
 // Negative & Defect Keyword Dictionaries (Multi-language: EN & KO expanded)
 const FLAW_CATEGORIES = {
   DURABILITY: {
-    label: '내구성 및 품질 불량 (Durability & Breakage)',
-    icon: '🔨',
+    label: '내구성 및 마감 불량 (Durability & Breakage)',
+    icon: '',
     keywords: [
       'broke', 'broken', 'defective', 'died', 'cracked', 'snapped', 'cheap plastic',
       'stopped working', 'poor quality', 'fell apart', 'garbage', 'junk', 'flimsy',
@@ -20,8 +20,8 @@ const FLAW_CATEGORIES = {
     ]
   },
   BATTERY_POWER: {
-    label: '배터리 및 전원/연결 이슈 (Battery & Connection)',
-    icon: '🔋',
+    label: '배터리 및 연결 불안정 (Battery & Connection)',
+    icon: '',
     keywords: [
       'battery', 'charging', 'won\'t charge', 'dies fast', 'drains quickly', 'overheating',
       'charger', 'charge life', 'drain', 'disconnects', 'drops connection', 'static noise',
@@ -30,8 +30,8 @@ const FLAW_CATEGORIES = {
     ]
   },
   ERGONOMICS_FIT: {
-    label: '착용감/사이즈/사용감 불편 (Fit & Ergonomics)',
-    icon: '📏',
+    label: '착용감 및 규격 부적합 (Fit & Ergonomics)',
+    icon: '',
     keywords: [
       'uncomfortable', 'too small', 'too big', 'doesn\'t fit', 'hurts', 'painful',
       'heavy', 'tight', 'loose', 'awkward', 'digging into', 'stiff', 'pinching',
@@ -40,8 +40,8 @@ const FLAW_CATEGORIES = {
     ]
   },
   USABILITY_UX: {
-    label: '조작 복잡성 및 앱/설명서 오류 (Usability & Manual)',
-    icon: '📖',
+    label: '조작 복잡성 및 안내 미흡 (Usability & Manual)',
+    icon: '',
     keywords: [
       'confusing', 'hard to use', 'instructions unclear', 'manual missing', 'complicated',
       'glitchy', 'setup nightmare', 'app crash', 'cant connect', 'buggy',
@@ -49,8 +49,8 @@ const FLAW_CATEGORIES = {
     ]
   },
   CUSTOMER_SUPPORT: {
-    label: '배송/환불/고객 서비스 불만 (Support & Return)',
-    icon: '📦',
+    label: '배송 및 반품/고객 지원 (Support & Return)',
+    icon: '',
     keywords: [
       'customer service', 'support', 'refused refund', 'return window', 'never arrived',
       'missing piece', 'open box', 'scam', 'ghosted', 'no reply', 'poor packaging',
