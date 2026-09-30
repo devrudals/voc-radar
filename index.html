@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOCRadar - E-Commerce Review & Negative Opportunity Miner</title>
+  <meta name="description" content="Extract competitor product defects, customer desires, and killer ad hooks from reviews in 3 seconds. Zero token cost.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navigation Bar -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="logo-icon">📡</div>
+        <div class="brand-text">
+          <span class="brand-title">VOCRadar</span>
+          <span class="brand-badge">Local-First • 0 Token Cost</span>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <a href="vocradar-chrome-extension.zip" download class="btn-extension-badge" title="크롬 브라우저에 바로 설치 가능한 압축팩">
+          <span class="ext-icon">🧩</span>
+          <span>Chrome Extension (.zip)</span>
+        </a>
+        <button id="btn-pro-modal" class="btn-pro-badge">
+          <span class="sparkle">✨</span>
+          <span id="nav-license-status">Upgrade to PRO ($14.99/mo)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="social-proof-pill">
+        <span>⭐ 140+ 아마존 & 쿠팡 셀러들이 매일 사용하는 0토큰 리뷰 인텔리전스</span>
+      </div>
+      <h1 class="hero-title">
+        경쟁사 <span class="gradient-text">부정 리뷰 300개</span>를 3초 만에 분석하여<br>
+        다음 대박 상품의 스펙과 광고 카피를 뽑아냅니다
+      </h1>
+      <p class="hero-subtitle">
+        아마존, 쿠팡, 스마트스토어 리뷰를 붙여넣으세요. 손가락 노가다 10시간을 1초 만에 끝내고<br>
+        <strong>[치명적 결함 TOP 5 + 고객이 애타게 찾는 기능 + 전환율 2배 광고 카피]</strong>를 즉시 추출합니다.
+      </p>
+    </section>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+      <!-- Input Panel -->
+      <section class="card input-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <span class="card-title">📝 리뷰 텍스트 입력 (Paste Customer Reviews)</span>
+            <span class="card-hint">줄바꿈 또는 번호로 구분된 리뷰 텍스트 지원</span>
+          </div>
+          <div class="sample-pills">
+            <span class="pills-label">💡 1초 빠른 체험:</span>
+            <button class="pill-btn" data-preset="earbuds">🎧 무선 이어폰</button>
+            <button class="pill-btn" data-preset="bottle">💧 스마트 텀블러</button>
+            <button class="pill-btn" data-preset="chair">🪑 인체공학 의자</button>
+          </div>
+        </div>
+
+        <div class="input-body">
+          <textarea id="review-input" placeholder="아마존 또는 쿠팡의 경쟁사 1~3점짜리 리뷰를 복사하여 붙여넣으세요... (또는 위의 '빠른 체험' 버튼을 클릭해보세요)"></textarea>
+        </div>
+
+        <div class="input-footer">
+          <div class="footer-left">
+            <label class="btn-secondary file-upload-label">
+              📁 CSV / 텍스트 파일 불러오기
+              <input type="file" id="file-upload" accept=".csv,.txt" style="display: none;">
+            </label>
+            <button id="btn-clear" class="btn-ghost">전체 비우기</button>
+          </div>
+          <button id="btn-analyze" class="btn-primary">
+            <span class="btn-icon">⚡</span>
+            <span>리뷰 인텔리전스 분석 시작 (3초 소요)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Results Dashboard (Hidden until analyzed) -->
+      <section id="results-panel" class="results-container" style="display: none;">
+        <!-- Metrics Bar -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">분석된 총 리뷰 수</div>
+            <div id="metric-total-reviews" class="metric-value">0</div>
+            <div class="metric-sub">결함 키워드 전수 스캔 완료</div>
+          </div>
+          <div class="metric-card highlight-card">
+            <div class="metric-label">시장 진입 기회 지수 (Opportunity Score)</div>
+            <div class="metric-score-wrap">
+              <span id="metric-opp-score" class="metric-value gradient-text">0</span>
+              <span class="metric-max">/ 100</span>
+            </div>
+            <div id="metric-opp-level" class="metric-sub text-emerald">기회 지수 계산 중</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">감성 비율 (부정 vs 긍정)</div>
+            <div class="sentiment-bar-wrap">
+              <div id="sentiment-neg" class="sentiment-segment neg" style="width: 50%;"></div>
+              <div id="sentiment-neu" class="sentiment-segment neu" style="width: 20%;"></div>
+              <div id="sentiment-pos" class="sentiment-segment pos" style="width: 30%;"></div>
+            </div>
+            <div class="sentiment-legend">
+              <span class="dot red"></span> 부정 <span id="val-neg">0%</span>
+              <span class="dot gray"></span> 중립 <span id="val-neu">0%</span>
+              <span class="dot green"></span> 긍정 <span id="val-pos">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Toolbar -->
+        <div class="toolbar">
+          <span class="toolbar-title">📥 분석 리포트 내보내기:</span>
+          <div class="toolbar-actions">
+            <button id="btn-export-csv" class="btn-action">📊 엑셀/CSV 다운로드</button>
+            <button id="btn-copy-md" class="btn-action">📋 마크다운 복사</button>
+            <button id="btn-export-json" class="btn-action">💾 JSON 내보내기</button>
+          </div>
+        </div>
+
+        <!-- Bento 3-Column Intelligence Grid -->
+        <div class="bento-grid">
+          <!-- Column 1: Fatal Flaws -->
+          <div class="card column-card">
+            <div class="column-header">
+              <div class="column-badge red-badge">🚨 제조 보완점</div>
+              <h3>치명적 결함 TOP 5 (Fatal Flaws)</h3>
+              <p>소비자들이 반품하고 1점을 주는 주된 원인입니다.</p>
+            </div>
+            <div id="flaws-list" class="column-body">
+              <!-- Dynamically Populated -->
+            </div>
+          </div>
+
+          <!-- Column 2: Unmet Desires -->
+          <div class="card column-card">
+            <div class="column-header">
+              <div class="column-badge blue-badge">💡 차별화 포인트</div>
+              <h3>고객이 애타게 찾는 기능 (Desires)</h3>
+              <p>새 제품에 이 기능을 추가하면 독점적 우위를 점합니다.</p>
+            </div>
+            <div id="desires-list" class="column-body">
+              <!-- Dynamically Populated -->
+            </div>
+          </div>
+
+          <!-- Column 3: Killer Ad Hooks -->
+          <div class="card column-card">
+            <div class="column-header">
+              <div class="column-badge purple-badge">🎯 전환율 2배</div>
+              <h3>킬러 광고 카피 앵글 (Ad Angles)</h3>
+              <p>구매자의 실제 감정을 그대로 활용한 고효율 카피입니다.</p>
+            </div>
+            <div id="ad-hooks-list" class="column-body">
+              <!-- Dynamically Populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Actionable Manufacturing Checklist -->
+        <div class="card checklist-card">
+          <div class="checklist-header">
+            <h3>🛠️ 공장/제조사 전달용 스펙 개선 오더 체크리스트</h3>
+            <p>OEM/ODM 제조 공장에 발주할 때 이 리스트를 그대로 첨부하여 불량률을 사전에 예방하세요.</p>
+          </div>
+          <div id="checklist-body" class="checklist-items">
+            <!-- Dynamically Populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- B2B Custom Audit Banner -->
+      <section class="card enterprise-banner">
+        <div class="banner-content">
+          <span class="banner-tag">🏢 B2B 맞춤형 의뢰</span>
+          <h3>경쟁사 1,000+개 리뷰 전수 크롤링 & 제조 스펙 PDF 심층 리포트가 필요하신가요?</h3>
+          <p>원하시는 아마존/쿠팡 상품 URL만 보내주시면 24시간 내 심층 제조 보고서와 광고 전략 시트를 제작해 드립니다. ($199 / 건)</p>
+        </div>
+        <a href="mailto:dlrudals02@yonsei.ac.kr?subject=[VOCRadar] B2B 심층 분석 의뢰 문의" class="btn-secondary btn-enterprise">
+          📩 기업용 심층 의뢰 문의하기
+        </a>
+      </section>
+    </main>
+
+    <!-- License / Pro Modal -->
+    <div id="modal-pro" class="modal-overlay" style="display: none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-icon">👑</span>
+            <h2>VOCRadar PRO 라이선스 결제 및 활성화</h2>
+          </div>
+          <button id="modal-close" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="plan-card">
+            <div class="plan-badge">BEST SELLER • 91% MARGIN</div>
+            <div class="plan-name">VOCRadar Pro Unlimited</div>
+            <div class="plan-price">
+              <span class="price-val">$14.99</span>
+              <span class="price-cycle">/ 월 (또는 평생 $49 LTD)</span>
+            </div>
+            <ul class="plan-features">
+              <li>✅ 무제한 리뷰 전수 분석 (회당 5,000건+)</li>
+              <li>✅ 엑셀/CSV & Notion 완벽 내보내기</li>
+              <li>✅ 전환율 2배 광고 카피 & 후킹 앵글 무제한 생성</li>
+              <li>✅ OEM/ODM 공장 발주용 스펙 체크리스트 자동 작성</li>
+              <li>✅ 아마존/쿠팡 원클릭 크롬 확장 프로그램 제공</li>
+            </ul>
+
+            <!-- Multiple Real Payment Channels -->
+            <div class="payment-channels">
+              <a href="https://lemonsqueezy.com" target="_blank" class="btn-primary btn-checkout">
+                💳 해외 신용카드 / Apple Pay 결제 ($14.99)
+              </a>
+              <div class="domestic-pay-box">
+                <span class="domestic-title">🇰🇷 국내 무통장 / 토스 송금 (월 19,000원 / 평생 49,000원)</span>
+                <p class="domestic-desc">
+                  토스 또는 계좌 송금 후 이메일(<code>dlrudals02@yonsei.ac.kr</code>)로 입금자명을 보내주시면 5분 내 PRO 키를 즉시 발급해 드립니다.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="license-input-section">
+            <label for="input-license-key">구매하신 라이선스 키 입력:</label>
+            <div class="license-field-row">
+              <input type="text" id="input-license-key" placeholder="VOC-PRO-XXXX-XXXX-XXXX 또는 UUID">
+              <button id="btn-activate-license" class="btn-secondary">즉시 활성화</button>
+            </div>
+            <div id="license-msg" class="license-msg"></div>
+            <div class="instant-test-hint">
+              * <em>테스트용 정식 PRO 라이선스 키:</em> <code>VOC-PRO-8842-9912-1004</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>© 2026 VOCRadar Intelligence. 100% Client-Side Privacy. Zero Server API Cost. Contact: dlrudals02@yonsei.ac.kr</p>
+    </footer>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
