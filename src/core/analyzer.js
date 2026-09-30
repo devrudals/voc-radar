@@ -71,7 +71,7 @@ const AD_HOOK_PATTERNS = [
 ];
 
 /**
- * Parses raw text input into clean review items
+ * Parses raw text or CSV input into clean review items with automatic column detection
  * @param {string|string[]} input 
  * @returns {string[]} Array of normalized review texts
  */
@@ -82,9 +82,32 @@ export function normalizeReviews(input) {
   if (typeof input !== 'string') return [];
 
   const cleaned = stripHTML(input);
-  // Split by double newline or common review delimiters (e.g., CSV rows or numbered lists)
+
+  // Check if input is a structured CSV file
+  const lines = cleaned.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length > 1 && lines[0].includes(',')) {
+    const headerCols = lines[0].split(',').map(c => c.replace(/^["']|["']$/g, '').trim().toLowerCase());
+    const targetIdx = headerCols.findIndex(col => 
+      ['review', 'reviews', 'comment', 'comments', 'body', 'content', 'text', 'feedback', '후기', '내용', '리뷰'].some(k => col.includes(k))
+    );
+
+    if (targetIdx !== -1) {
+      const extracted = [];
+      for (let i = 1; i < lines.length; i++) {
+        // Simple CSV row parser handling quoted commas
+        const row = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
+        if (row && row[targetIdx]) {
+          const val = row[targetIdx].replace(/^["']|["']$/g, '').trim();
+          if (val.length > 5) extracted.push(val);
+        }
+      }
+      if (extracted.length > 0) return extracted;
+    }
+  }
+
+  // Fallback: Split by double newline, carriage return, or numbered lists (e.g. "1. ", "2) ")
   return cleaned
-    .split(/\n{2,}|\r\n{2,}|(?:\n\d+[\.\)])/g)
+    .split(/\n{2,}|\r\n{2,}|(?:\n\d+[\.\)])|(?:\n[-•*]\s+)/g)
     .map(r => r.trim())
     .filter(r => r.length > 5);
 }

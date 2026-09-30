@@ -1,4 +1,4 @@
-/* VOCRadar Design Tokens & Aesthetic Styling */
+/* VOCRadar Design Tokens & Aesthetic Styling - v2.0 Production */
 :root {
   --bg-main: #090c10;
   --bg-card: #0e131d;
@@ -14,6 +14,7 @@
   --accent-primary: #4f46e5;
   --accent-hover: #4338ca;
   --accent-gradient: linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #06b6d4 100%);
+  --ltd-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%);
   
   --emerald: #10b981;
   --rose: #f43f5e;
@@ -43,6 +44,37 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Scarcity Bar */
+.top-announcement-bar {
+  background: linear-gradient(90deg, #1e1b4b 0%, #311042 50%, #1e1b4b 100%);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 8px 16px;
+  font-size: 12px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.announcement-content {
+  color: #e0e7ff;
+}
+
+.btn-text-link {
+  background: none;
+  border: none;
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.btn-text-link:hover {
+  color: #7dd3fc;
+}
+
 .app-container {
   max-width: 1240px;
   margin: 0 auto;
@@ -57,6 +89,8 @@ body {
   padding: 20px 0;
   border-bottom: 1px solid var(--border-subtle);
   margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .brand {
@@ -95,6 +129,33 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Language Switcher */
+.lang-switch-wrap {
+  display: flex;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 2px;
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lang-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 .btn-extension-badge {
@@ -437,15 +498,31 @@ body {
   gap: 12px;
 }
 
-.toolbar-title {
+.toolbar-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #06090e;
+  border: 1px solid var(--border-subtle);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  flex: 1;
+  max-width: 380px;
+}
+
+.toolbar-search-wrap input {
+  background: transparent;
+  border: none;
+  color: #fff;
   font-size: 13px;
-  font-weight: 700;
-  color: var(--text-secondary);
+  outline: none;
+  width: 100%;
 }
 
 .toolbar-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .btn-action {
@@ -465,6 +542,17 @@ body {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.btn-share-twitter {
+  background: rgba(29, 155, 240, 0.15);
+  border-color: rgba(29, 155, 240, 0.4);
+  color: #38bdf8;
+}
+
+.btn-share-twitter:hover {
+  background: rgba(29, 155, 240, 0.3);
+  color: #fff;
+}
+
 /* Bento Grid */
 .bento-grid {
   display: grid;
@@ -476,6 +564,7 @@ body {
 .column-card {
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .column-header {
@@ -517,6 +606,12 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 14px;
+  position: relative;
+  transition: transform 0.15s ease;
+}
+
+.flaw-item:hover {
+  transform: translateY(-2px);
 }
 
 .flaw-top {
@@ -570,6 +665,11 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 14px;
+  transition: transform 0.15s ease;
+}
+
+.desire-item:hover, .ad-item:hover {
+  transform: translateY(-2px);
 }
 
 .desire-title {
@@ -598,6 +698,60 @@ body {
   border-radius: var(--radius-sm);
   font-size: 12px;
   color: var(--text-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-mini-copy {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-mini-copy:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Freemium Paywall Box */
+.paywall-overlay-box {
+  background: linear-gradient(180deg, rgba(14, 19, 29, 0.8) 0%, rgba(20, 28, 43, 0.98) 100%);
+  border: 1px dashed rgba(99, 102, 241, 0.5);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+  margin-top: 14px;
+  backdrop-filter: blur(8px);
+}
+
+.paywall-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.paywall-overlay-box h4 {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.paywall-overlay-box p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  max-width: 320px;
+  margin: 0 auto 16px;
+}
+
+.btn-unlock-paywall {
+  font-size: 13px;
+  padding: 10px 20px;
 }
 
 /* Checklist Card */
@@ -692,7 +846,7 @@ body {
   background: rgba(56, 189, 248, 0.35);
 }
 
-/* Modal */
+/* Modal with Tiered Pricing Grid */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -708,8 +862,8 @@ body {
   background: #0e131d;
   border: 1px solid var(--border-glow);
   border-radius: var(--radius-lg);
-  max-width: 540px;
-  width: 90%;
+  max-width: 680px;
+  width: 92%;
   padding: 28px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   max-height: 90vh;
@@ -742,14 +896,27 @@ body {
   cursor: pointer;
 }
 
+.pricing-tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
 .plan-card {
   background: #141c2b;
-  border: 1px solid rgba(99, 102, 241, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
   padding: 20px;
   text-align: center;
   position: relative;
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.highlight-ltd {
+  border-color: rgba(236, 72, 153, 0.5);
+  background: linear-gradient(180deg, rgba(236, 72, 153, 0.08) 0%, #141c2b 100%);
 }
 
 .plan-badge {
@@ -765,42 +932,52 @@ body {
   border-radius: var(--radius-pill);
 }
 
+.ltd-badge {
+  background: var(--ltd-gradient);
+}
+
+.plan-name {
+  font-size: 16px;
+  font-weight: 800;
+  margin-top: 6px;
+}
+
 .plan-price {
-  margin: 12px 0;
+  margin: 10px 0 14px;
 }
 
 .price-val {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 800;
 }
 
 .price-cycle {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 
 .plan-features {
   list-style: none;
   text-align: left;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 20px;
-}
-
-.payment-channels {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex: 1;
 }
 
 .btn-checkout {
   width: 100%;
   text-decoration: none;
   justify-content: center;
-  font-size: 14px;
+  font-size: 13px;
+  padding: 10px;
+}
+
+.btn-ltd {
+  background: var(--ltd-gradient);
 }
 
 .domestic-pay-box {
@@ -809,6 +986,7 @@ body {
   border-radius: var(--radius-sm);
   padding: 12px;
   text-align: left;
+  margin-bottom: 20px;
 }
 
 .domestic-title {
@@ -858,6 +1036,28 @@ body {
   margin-top: 8px;
 }
 
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .footer {
   text-align: center;
   padding: 40px 0 20px;
@@ -865,4 +1065,27 @@ body {
   color: var(--text-muted);
   border-top: 1px solid var(--border-subtle);
   margin-top: 60px;
+}
+
+/* Print Stylesheet for B2B Client Reports */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .navbar, .hero-section, .input-card, .top-announcement-bar, .toolbar, .enterprise-banner, .footer, .btn-pro-badge, .paywall-overlay-box {
+    display: none !important;
+  }
+  .results-container {
+    display: block !important;
+  }
+  .card, .metric-card, .flaw-item, .desire-item, .ad-item, .check-item {
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+  .bento-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
 }
