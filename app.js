@@ -186,6 +186,9 @@ function switchLanguage(lang) {
 function loadPreset(key) {
   const preset = SAMPLE_PRESETS[key];
   if (!preset) return;
+  document.querySelectorAll('.pill-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.preset === key);
+  });
   reviewInput.value = preset.reviews.join('\n\n');
   runAnalysis();
 }
@@ -210,7 +213,7 @@ function runAnalysis() {
     return;
   }
 
-  btnAnalyze.innerHTML = '<span class="btn-icon">⏳</span><span>분석 중... (0.5s)</span>';
+  btnAnalyze.innerHTML = '<span class="btn-icon">⏳</span><span>분석 중... (0.3s)</span>';
   btnAnalyze.disabled = true;
 
   setTimeout(() => {
@@ -220,7 +223,7 @@ function runAnalysis() {
     btnAnalyze.innerHTML = '<span class="btn-icon">⚡</span><span>리뷰 인텔리전스 분석 시작 (3초 소요)</span>';
     btnAnalyze.disabled = false;
     showToast('리뷰 분석이 완료되었습니다! 🚀');
-  }, 250);
+  }, 200);
 }
 
 function renderResults(report) {
@@ -229,10 +232,17 @@ function renderResults(report) {
   resultsPanel.style.display = 'block';
   const isPro = licenseManager.isPro();
 
-  // 1. Metrics
+  // 1. Metrics & SVG Gauge Animation
   metricTotal.textContent = report.totalReviews.toLocaleString() + '개';
   metricScore.textContent = report.opportunityScore;
   metricLevel.textContent = report.opportunityLevel;
+
+  const gaugeFill = document.getElementById('gauge-fill');
+  if (gaugeFill) {
+    const maxDash = 141.37;
+    const offset = Math.max(0, maxDash - (maxDash * (report.opportunityScore / 100)));
+    gaugeFill.style.strokeDashoffset = offset.toFixed(2);
+  }
 
   const s = report.sentimentSummary;
   sentimentNeg.style.width = `${s.negativePercent}%`;
@@ -331,16 +341,17 @@ function renderResults(report) {
   }
 }
 
+let searchDebounceTimer = null;
 function handleResultsFilter(e) {
-  const query = e.target.value.toLowerCase().trim();
-  document.querySelectorAll('.flaw-item, .desire-item, .ad-item').forEach(el => {
-    const text = el.dataset.search || '';
-    if (!query || text.includes(query)) {
-      el.style.display = 'block';
-    } else {
-      el.style.display = 'none';
-    }
-  });
+  clearTimeout(searchDebounceTimer);
+  const target = e.target;
+  searchDebounceTimer = setTimeout(() => {
+    const query = target.value.toLowerCase().trim();
+    document.querySelectorAll('.flaw-item, .desire-item, .ad-item').forEach(el => {
+      const text = el.dataset.search || '';
+      el.style.display = (!query || text.includes(query)) ? 'block' : 'none';
+    });
+  }, 120);
 }
 
 function handleExportCSV() {

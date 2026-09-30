@@ -77,7 +77,8 @@ export function exportToCSV(report) {
     });
   }
 
-  return rows.map(r => r.join(',')).join('\n');
+  // Prepend UTF-8 BOM so Microsoft Excel cleanly renders Korean & multilingual characters
+  return '\uFEFF' + rows.map(r => r.join(',')).join('\n');
 }
 
 /**

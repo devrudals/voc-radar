@@ -430,10 +430,38 @@ body {
   letter-spacing: -0.5px;
 }
 
-.metric-score-wrap {
+.metric-gauge-wrap {
+  position: relative;
+  width: 140px;
+  height: 80px;
+  margin: 4px auto 0;
+}
+
+.gauge-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gauge-progress {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gauge-text-overlay {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
+}
+
+.pill-btn.active {
+  background: rgba(99, 102, 241, 0.35) !important;
+  border-color: rgba(99, 102, 241, 0.8) !important;
+  color: #fff !important;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
 }
 
 .metric-max {
