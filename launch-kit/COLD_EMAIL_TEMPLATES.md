@@ -27,7 +27,7 @@ If you're currently manufacturing or planning product improvements for {{Your_Co
 
 Best,  
 [Your Name]  
-Creator of VOCRadar (https://vocradar.com)
+Creator of VOCRadar (https://devrudals.github.io/voc-radar/)
 
 ---
 

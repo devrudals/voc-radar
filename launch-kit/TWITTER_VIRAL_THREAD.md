@@ -57,6 +57,6 @@ I got tired of doing this analysis manually, so I built a fast, zero-token revie
 ⚡ Paste reviews -> Get Fatal Flaws + Desires + Ad Hooks in 3 seconds.
 
 Try the free interactive demo here (no signup needed):
-👉 [https://vocradar.com]
+👉 https://devrudals.github.io/voc-radar/
 
 RT if you found this valuable! 🔁

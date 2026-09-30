@@ -31,6 +31,8 @@ So I built **VOCRadar**:
    🛠️ **OEM/ODM Factory Specification Checklist** ready to send to your supplier.
 
 🎁 **Product Hunt Special:** The first 50 makers can get our **Lifetime Deal for $49** instead of monthly subscriptions using code `PH50LIFETIME`.
+👉 Live Demo: https://devrudals.github.io/voc-radar/
+👉 Open Source Repo: https://github.com/devrudals/voc-radar
 
 Try the free interactive demo (no sign-up required) and let me know your feedback! What competitor product should we analyze next? 🚀
 ```

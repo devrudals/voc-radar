@@ -51,7 +51,8 @@ I ran a text-mining breakdown on 500 recent 1-3 star reviews for one of the top 
 
 I built a small local tool for myself that automates this entire text-mining breakdown in 3 seconds so I don't have to read 500 reviews manually.
 It's completely free to test in your browser (no signup/credit card required):
-👉 [https://vocradar.com](https://vocradar.com) (or localhost demo)
+👉 https://devrudals.github.io/voc-radar/
+GitHub Source: https://github.com/devrudals/voc-radar
 
 Hope this breakdown helps someone working on their Q4 product sourcing! What category should I analyze next?
 ```
