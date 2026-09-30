@@ -83,14 +83,16 @@
           <button id="lang-en" class="lang-btn">EN</button>
         </div>
 
-        <a href="vocradar-chrome-extension.zip" download class="btn-extension-badge" title="크롬 브라우저 직접 설치용 압축팩">
+        <button id="btn-ext-modal" class="btn-extension-badge" title="크롬 확장 프로그램 연동 및 설치">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-            <line x1="12" y1="22.08" x2="12" y2="12"/>
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="4"/>
+            <line x1="21.17" y1="8" x2="12" y2="8"/>
+            <line x1="3.95" y1="6.06" x2="8.54" y2="14"/>
+            <line x1="10.88" y1="21.94" x2="15.46" y2="14"/>
           </svg>
-          <span id="t-ext-btn">Extension (.zip)</span>
-        </a>
+          <span id="t-ext-btn">Chrome Extension</span>
+        </button>
 
         <button id="btn-pro-modal" class="btn-pro-badge">
           <span id="nav-license-status">Upgrade to PRO ($14.99/mo)</span>
@@ -167,25 +169,19 @@
             <div class="metric-sub" id="t-metric-total-sub">결함 키워드 전수 스캔 완료</div>
           </div>
           
-          <div class="metric-card highlight-card">
+          <div class="metric-card">
             <div class="metric-label" id="t-metric-opp-label">시장 진입 기회 지수 (Opportunity Score)</div>
-            <div class="metric-gauge-wrap">
-              <svg class="gauge-svg" viewBox="0 0 120 70">
-                <path class="gauge-bg" d="M 15 60 A 45 45 0 0 1 105 60" fill="none" stroke="#1c2438" stroke-width="9" stroke-linecap="round" />
-                <path id="gauge-fill" class="gauge-progress" d="M 15 60 A 45 45 0 0 1 105 60" fill="none" stroke="url(#gauge-grad)" stroke-width="9" stroke-linecap="round" stroke-dasharray="141.37" stroke-dashoffset="141.37" />
-                <defs>
-                  <linearGradient id="gauge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#3b82f6" />
-                    <stop offset="100%" stop-color="#10b981" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div class="gauge-text-overlay">
-                <span id="metric-opp-score" class="metric-value gradient-text">0</span>
-                <span class="metric-max">/ 100</span>
-              </div>
+            <div class="score-row">
+              <span id="metric-opp-score" class="score-number">0</span>
+              <span class="score-denom">/ 100</span>
             </div>
-            <div id="metric-opp-level" class="metric-sub text-emerald">기회 지수 계산 중</div>
+            <div class="score-progress-track">
+              <div id="gauge-fill" class="score-progress-bar" style="width: 0%;"></div>
+            </div>
+            <div class="score-status-row">
+              <span class="score-badge" id="t-opp-badge">OPPORTUNITY</span>
+              <span id="metric-opp-level" class="score-level-text">기회 지수 계산 중</span>
+            </div>
           </div>
 
           <div class="metric-card">
@@ -385,6 +381,58 @@
             <div id="license-msg" class="license-msg"></div>
             <div class="instant-test-hint">
               * <em>테스트용 정식 PRO 라이선스 키:</em> <code>VOC-PRO-8842-9912-1004</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chrome Extension Connect Modal -->
+    <div id="modal-ext" class="modal-overlay" style="display: none;">
+      <div class="modal-box modal-ext-box">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <h2>Chrome 확장 프로그램 연동 및 스토어 연결</h2>
+          </div>
+          <button id="modal-ext-close" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="ext-options-grid">
+            <!-- Option 1: Instant Local Install -->
+            <div class="ext-option-card">
+              <div class="ext-option-header">
+                <span class="ext-step-tag">방법 1 • 즉시 사용 (10초)</span>
+                <h3>내 크롬 브라우저에 바로 로드</h3>
+                <p>스토어 심사 대기 없이 지금 즉시 쿠팡/아마존에서 실행할 수 있습니다.</p>
+              </div>
+              <ol class="ext-step-list">
+                <li>아래 버튼을 눌러 확장 프로그램 압축팩을 다운로드 후 압축을 풉니다.</li>
+                <li>크롬 주소창에 <code>chrome://extensions</code> 를 입력해 이동합니다.</li>
+                <li>우측 상단 <strong>[개발자 모드]</strong> 스위치를 켭니다.</li>
+                <li>좌측 상단 <strong>[압축해제된 확장 프로그램을 로드합니다]</strong>를 누르고 압축 푼 폴더를 선택하면 끝!</li>
+              </ol>
+              <a href="vocradar-chrome-extension.zip" download class="btn-primary btn-ext-download">
+                확장팩 다운로드 (vocradar-chrome-extension.zip)
+              </a>
+            </div>
+
+            <!-- Option 2: Official Chrome Web Store -->
+            <div class="ext-option-card">
+              <div class="ext-option-header">
+                <span class="ext-step-tag">방법 2 • 공식 배포</span>
+                <h3>구글 크롬 웹스토어 공식 등록</h3>
+                <p>전 세계 크롬 유저들이 검색해서 바로 설치할 수 있도록 스토어에 공식 등록합니다.</p>
+              </div>
+              <ol class="ext-step-list">
+                <li><a href="https://chrome.google.com/webstore/devconsole" target="_blank" class="link-accent">Chrome 개발자 대시보드</a>에 로그인합니다 ($5 평생 1회 결제 필요).</li>
+                <li><strong>[새 항목 추가]</strong>를 누르고 다운로드한 <code>vocradar-chrome-extension.zip</code> 파일을 드래그합니다.</li>
+                <li>준비된 설명문과 스토어 리스팅 정보를 입력하고 [게시]를 누르면 완료됩니다.</li>
+              </ol>
+              <div class="ext-actions-row">
+                <a href="https://chrome.google.com/webstore/devconsole" target="_blank" class="btn-secondary btn-store-link">
+                  Chrome 개발자 콘솔 바로가기 &rarr;
+                </a>
+              </div>
             </div>
           </div>
         </div>

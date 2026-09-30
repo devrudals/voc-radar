@@ -152,12 +152,25 @@ function setupEventListeners() {
     });
   });
 
+  // Extension Modal
+  const btnExtModal = document.getElementById('btn-ext-modal');
+  const modalExt = document.getElementById('modal-ext');
+  const modalExtClose = document.getElementById('modal-ext-close');
+
+  if (btnExtModal && modalExt) {
+    btnExtModal.addEventListener('click', () => { modalExt.style.display = 'flex'; });
+  }
+  if (modalExtClose && modalExt) {
+    modalExtClose.addEventListener('click', () => { modalExt.style.display = 'none'; });
+  }
+
   // Modal Triggers
-  btnProModal.addEventListener('click', () => modalPro.style.display = 'flex');
-  btnTopLTD.addEventListener('click', () => modalPro.style.display = 'flex');
-  modalClose.addEventListener('click', () => modalPro.style.display = 'none');
+  btnProModal.addEventListener('click', () => { modalPro.style.display = 'flex'; });
+  btnTopLTD.addEventListener('click', () => { modalPro.style.display = 'flex'; });
+  modalClose.addEventListener('click', () => { modalPro.style.display = 'none'; });
   window.addEventListener('click', (e) => {
     if (e.target === modalPro) modalPro.style.display = 'none';
+    if (modalExt && e.target === modalExt) modalExt.style.display = 'none';
   });
 
   // License Activation
@@ -242,9 +255,7 @@ function renderResults(report) {
 
   const gaugeFill = document.getElementById('gauge-fill');
   if (gaugeFill) {
-    const maxDash = 141.37;
-    const offset = Math.max(0, maxDash - (maxDash * (report.opportunityScore / 100)));
-    gaugeFill.style.strokeDashoffset = offset.toFixed(2);
+    gaugeFill.style.width = `${Math.min(100, Math.max(0, report.opportunityScore))}%`;
   }
 
   const s = report.sentimentSummary;
