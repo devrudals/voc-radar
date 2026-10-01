@@ -80,44 +80,228 @@ const AD_HOOK_PATTERNS = [
 ];
 
 /**
- * Parses raw text or CSV input into clean review items with automatic column detection
+ * Detects UI buttons, author metadata, ratings, dates, and noise lines from scraped web reviews
+ * @param {string} line 
+ * @returns {boolean}
+ */
+export function isNoiseLine(line) {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.length <= 2) return true;
+  if (/^[★☆\s\d\.\/\(\)\-]+$/.test(trimmed) && trimmed.length < 15) return true;
+  if (/^(?:\d(?:\.\d)?\s*(?:out of 5 stars|점 만점에|점|stars?)|★+|☆+)/i.test(trimmed)) return true;
+  if (/^(?:별점|평점|rating|stars)\s*[:\d\.\/]/i.test(trimmed)) return true;
+  if (/^(?:신고하기|신고|report(?:\s+abuse)?|수정|삭제|더보기|접기|목록으로|답글|댓글)$/i.test(trimmed)) return true;
+  if (/^(?:도움이 돼요|도움이 안돼요|도움돼요|도움 안돼요|helpful|unhelpful)(?:\s*\d+)?$/i.test(trimmed)) return true;
+  if (/^\d+\s*명(?:에게)?\s*도움이\s*되었습니다/i.test(trimmed)) return true;
+  if (/^\d+\s*people found this helpful/i.test(trimmed)) return true;
+  if (/^(?:베스트순|최신순|추천순|랭킹순|쿠팡체험단|verified purchase|top reviewer)/i.test(trimmed)) return true;
+  if (/^(?:reviewed in .+ on |작성일\s*[:\.]?|등록일\s*[:\.]?)/i.test(trimmed)) return true;
+  if (/^\d{4}[\.\-\/]\d{1,2}[\.\-\/]\d{1,2}(?:\s+\d{1,2}:\d{2})?$/.test(trimmed)) return true;
+  if (/^(?:옵션|색상|사이즈|스타일|용량|color|size|style|flavor|variant)\s*[:]/i.test(trimmed)) return true;
+  if (/^[가-힣A-Za-z]\*{1,4}[가-힣A-Za-z0-9]?$/.test(trimmed)) return true;
+  return false;
+}
+
+/**
+ * Parses raw text, TSV (Excel/Sheets), CSV, or web scrape into clean review items with statistics
+ * @param {string|string[]} input 
+ * @returns {{ reviews: string[], stats: { totalRawLines: number, noiseLinesFiltered: number, validReviews: number, detectedFormat: string } }}
+ */
+export function parseReviewsWithStats(input) {
+  if (Array.isArray(input)) {
+    const reviews = input.map(r => stripHTML(r)).filter(r => r && r.length > 5);
+    return {
+      reviews,
+      stats: {
+        totalRawLines: input.length,
+        noiseLinesFiltered: 0,
+        validReviews: reviews.length,
+        detectedFormat: 'Array'
+      }
+    };
+  }
+
+  if (typeof input !== 'string' || !input.trim()) {
+    return {
+      reviews: [],
+      stats: { totalRawLines: 0, noiseLinesFiltered: 0, validReviews: 0, detectedFormat: 'Empty' }
+    };
+  }
+
+  const cleaned = stripHTML(input);
+  const rawLines = cleaned.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+  const totalRawLines = rawLines.length;
+
+  // 1. TSV Detection (Excel / Google Sheets clipboard)
+  const tabLines = rawLines.filter(l => l.includes('\t'));
+  if (tabLines.length >= 2 || (rawLines.length === 1 && rawLines[0].includes('\t'))) {
+    const rows = rawLines.map(l => l.split('\t'));
+    const numCols = Math.max(...rows.map(r => r.length));
+
+    // Check header row for review column
+    const headerRow = rows[0].map(c => c.replace(/^["'\s]+|["'\s]+$/g, '').toLowerCase());
+    const headerIdx = headerRow.findIndex(col =>
+      ['review', 'reviews', 'comment', 'comments', 'body', 'content', 'text', 'feedback', '후기', '내용', '리뷰', '평가'].some(k => col.includes(k))
+    );
+
+    let targetColIdx = headerIdx;
+    let startRow = headerIdx !== -1 ? 1 : 0;
+
+    // Fallback: Pick column with longest average length
+    if (targetColIdx === -1) {
+      let maxAvgLen = -1;
+      for (let c = 0; c < numCols; c++) {
+        let totalLen = 0;
+        let count = 0;
+        for (let r = startRow; r < rows.length; r++) {
+          if (rows[r][c]) {
+            totalLen += rows[r][c].trim().length;
+            count++;
+          }
+        }
+        const avg = count > 0 ? totalLen / count : 0;
+        if (avg > maxAvgLen) {
+          maxAvgLen = avg;
+          targetColIdx = c;
+        }
+      }
+    }
+
+    if (targetColIdx !== -1) {
+      const reviews = [];
+      let noiseCount = 0;
+      for (let i = startRow; i < rows.length; i++) {
+        const val = rows[i][targetColIdx] ? rows[i][targetColIdx].replace(/^["'\s]+|["'\s]+$/g, '').trim() : '';
+        if (val.length > 5 && !isNoiseLine(val)) {
+          reviews.push(val);
+        } else if (val) {
+          noiseCount++;
+        }
+      }
+      return {
+        reviews,
+        stats: {
+          totalRawLines,
+          noiseLinesFiltered: noiseCount + (headerIdx !== -1 ? 1 : 0),
+          validReviews: reviews.length,
+          detectedFormat: 'TSV (Excel/Sheets)'
+        }
+      };
+    }
+  }
+
+  // 2. CSV Detection
+  if (rawLines.length > 1 && rawLines[0].includes(',')) {
+    const headerCols = rawLines[0].split(',').map(c => c.replace(/^["'\s]+|["'\s]+$/g, '').toLowerCase());
+    const targetIdx = headerCols.findIndex(col =>
+      ['review', 'reviews', 'comment', 'comments', 'body', 'content', 'text', 'feedback', '후기', '내용', '리뷰', '평가'].some(k => col.includes(k))
+    );
+
+    if (targetIdx !== -1) {
+      const reviews = [];
+      let noiseCount = 0;
+      for (let i = 1; i < rawLines.length; i++) {
+        const row = rawLines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || rawLines[i].split(',');
+        if (row && row[targetIdx]) {
+          const val = row[targetIdx].replace(/^["'\s]+|["'\s]+$/g, '').trim();
+          if (val.length > 5 && !isNoiseLine(val)) {
+            reviews.push(val);
+          } else {
+            noiseCount++;
+          }
+        }
+      }
+      if (reviews.length > 0) {
+        return {
+          reviews,
+          stats: {
+            totalRawLines,
+            noiseLinesFiltered: noiseCount + 1,
+            validReviews: reviews.length,
+            detectedFormat: 'CSV'
+          }
+        };
+      }
+    }
+  }
+
+  // 3. Fallback: Web Page Scrape & Multiline De-noising
+  let noiseCount = 0;
+  const reviews = [];
+
+  const rawBlocks = cleaned.split(/\r?\n\s*\r?\n+/);
+  if (rawBlocks.length > 1) {
+    for (const block of rawBlocks) {
+      const bLines = block.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const cleanLines = [];
+      for (const line of bLines) {
+        if (isNoiseLine(line)) {
+          noiseCount++;
+        } else {
+          cleanLines.push(line);
+        }
+      }
+      if (cleanLines.length > 0) {
+        const reviewText = cleanLines.join(' ').trim();
+        if (reviewText.length > 5) reviews.push(reviewText);
+      }
+    }
+  } else {
+    let currentReviewLines = [];
+    const lines = cleaned.split(/\r?\n/).map(l => l.trim());
+    for (const line of lines) {
+      if (!line) {
+        if (currentReviewLines.length > 0) {
+          const t = currentReviewLines.join(' ').trim();
+          if (t.length > 5) reviews.push(t);
+          currentReviewLines = [];
+        }
+        continue;
+      }
+      if (isNoiseLine(line)) {
+        noiseCount++;
+        if (currentReviewLines.length > 0) {
+          const t = currentReviewLines.join(' ').trim();
+          if (t.length > 5) reviews.push(t);
+          currentReviewLines = [];
+        }
+      } else {
+        if (/^\d+[\.\)]\s+/.test(line)) {
+          if (currentReviewLines.length > 0) {
+            const t = currentReviewLines.join(' ').trim();
+            if (t.length > 5) reviews.push(t);
+            currentReviewLines = [];
+          }
+          currentReviewLines.push(line.replace(/^\d+[\.\)]\s*/, ''));
+        } else {
+          currentReviewLines.push(line);
+        }
+      }
+    }
+    if (currentReviewLines.length > 0) {
+      const t = currentReviewLines.join(' ').trim();
+      if (t.length > 5) reviews.push(t);
+    }
+  }
+
+  return {
+    reviews,
+    stats: {
+      totalRawLines,
+      noiseLinesFiltered: noiseCount,
+      validReviews: reviews.length,
+      detectedFormat: noiseCount > 0 ? 'Web Page Paste' : 'Text'
+    }
+  };
+}
+
+/**
+ * Backward-compatible helper: returns normalized review array
  * @param {string|string[]} input 
  * @returns {string[]} Array of normalized review texts
  */
 export function normalizeReviews(input) {
-  if (Array.isArray(input)) {
-    return input.map(r => stripHTML(r)).filter(r => r.length > 5);
-  }
-  if (typeof input !== 'string') return [];
-
-  const cleaned = stripHTML(input);
-
-  // Check if input is a structured CSV file
-  const lines = cleaned.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-  if (lines.length > 1 && lines[0].includes(',')) {
-    const headerCols = lines[0].split(',').map(c => c.replace(/^["']|["']$/g, '').trim().toLowerCase());
-    const targetIdx = headerCols.findIndex(col => 
-      ['review', 'reviews', 'comment', 'comments', 'body', 'content', 'text', 'feedback', '후기', '내용', '리뷰'].some(k => col.includes(k))
-    );
-
-    if (targetIdx !== -1) {
-      const extracted = [];
-      for (let i = 1; i < lines.length; i++) {
-        const row = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
-        if (row && row[targetIdx]) {
-          const val = row[targetIdx].replace(/^["']|["']$/g, '').trim();
-          if (val.length > 5) extracted.push(val);
-        }
-      }
-      if (extracted.length > 0) return extracted;
-    }
-  }
-
-  // Fallback: Split by double newline, carriage return, or numbered lists
-  return cleaned
-    .split(/\n{2,}|\r\n{2,}|(?:\n\d+[\.\)])|(?:\n[-•*]\s+)/g)
-    .map(r => r.trim())
-    .filter(r => r.length > 5);
+  return parseReviewsWithStats(input).reviews;
 }
 
 /**
@@ -128,13 +312,15 @@ export function normalizeReviews(input) {
  * @returns {object} Full VOC Intelligence Report
  */
 export function analyzeReviews(rawReviews, options = {}) {
-  const reviews = normalizeReviews(rawReviews);
+  const parseResult = parseReviewsWithStats(rawReviews);
+  const reviews = parseResult.reviews;
   const totalReviews = reviews.length;
 
   if (totalReviews === 0) {
     return {
       status: 'EMPTY',
       totalReviews: 0,
+      inputStats: parseResult.stats,
       fatalFlaws: [],
       unmetDesires: [],
       adAngles: [],
@@ -286,6 +472,7 @@ export function analyzeReviews(rawReviews, options = {}) {
   return {
     status: 'SUCCESS',
     totalReviews,
+    inputStats: parseResult.stats,
     sentimentSummary: {
       positivePercent: Math.round((positiveCount / totalReviews) * 100),
       neutralPercent: Math.round((neutralCount / totalReviews) * 100),

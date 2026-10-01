@@ -122,8 +122,8 @@
       <section class="card input-card">
         <div class="card-header">
           <div class="card-header-left">
-            <span class="card-title" id="t-input-title">리뷰 데이터 입력 (Review Text / CSV)</span>
-            <span class="card-hint" id="t-input-hint">줄바꿈, 번호, 또는 CSV 파일 내용 지원 (자동 컬럼 감지)</span>
+            <span class="card-title" id="t-input-title">스마트 리뷰 입력 & 자동 정제 (Smart Input)</span>
+            <span class="card-hint" id="t-input-hint">쿠팡·아마존 화면 통째 드래그, 엑셀 표(TSV), CSV 파일 드롭 자동 정제 지원</span>
           </div>
           <div class="sample-pills">
             <span class="pills-label" id="t-pills-label">샘플 데이터셋:</span>
@@ -134,20 +134,42 @@
         </div>
 
         <div class="input-body">
-          <textarea id="review-input" placeholder="아마존 또는 쿠팡의 경쟁사 1~3점짜리 리뷰를 복사하여 붙여넣으세요... (또는 상단 샘플 버튼을 클릭하세요)"></textarea>
+          <textarea id="review-input" placeholder="아마존 또는 쿠팡 리뷰 페이지를 통째로 복사해서 붙여넣으세요. (별점·날짜·신고하기 등 노이즈는 0.1초 만에 자동 정제됩니다)&#10;또는 엑셀/CSV 파일을 이 영역에 직접 드래그 & 드롭하세요."></textarea>
+          <div class="drop-hint-overlay">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <span>파일을 여기에 놓으면 즉시 로드됩니다 (.csv, .tsv, .txt)</span>
+          </div>
         </div>
 
         <div class="input-footer">
           <div class="footer-left">
+            <button id="btn-paste-clipboard" class="btn-secondary" title="클립보드에서 텍스트 즉시 가져오기">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              <span id="t-paste-btn">클립보드에서 가져오기</span>
+            </button>
+
             <label class="btn-secondary file-upload-label">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="17 8 12 3 7 8"/>
                 <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              <span id="t-upload-label">CSV / 텍스트 파일 불러오기</span>
-              <input type="file" id="file-upload" accept=".csv,.txt" style="display: none;">
+              <span id="t-upload-label">CSV / 파일 불러오기</span>
+              <input type="file" id="file-upload" accept=".csv,.txt,.tsv" style="display: none;">
             </label>
+
+            <div id="input-stats-badge" class="input-stats-badge" style="display: none;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="input-stats-text">유효 리뷰 0건 감지</span>
+            </div>
+
             <button id="btn-clear" class="btn-ghost">전체 비우기</button>
           </div>
           <button id="btn-analyze" class="btn-primary">

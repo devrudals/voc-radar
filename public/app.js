@@ -2,7 +2,7 @@
  * VOCRadar Client Application Controller - v2.0 Production
  */
 
-import { analyzeReviews } from './src/core/analyzer.js';
+import { analyzeReviews, parseReviewsWithStats } from './src/core/analyzer.js';
 import { exportToCSV, exportToMarkdown } from './src/core/exporter.js';
 import { LicenseManager } from './src/core/license.js';
 import { SAMPLE_PRESETS } from './src/data/sample-presets.js';
@@ -14,6 +14,10 @@ let currentLang = 'ko';
 
 // DOM Elements
 const reviewInput = document.getElementById('review-input');
+const inputBody = document.querySelector('.input-body');
+const btnPasteClipboard = document.getElementById('btn-paste-clipboard');
+const inputStatsBadge = document.getElementById('input-stats-badge');
+const inputStatsText = document.getElementById('input-stats-text');
 const btnAnalyze = document.getElementById('btn-analyze');
 const btnClear = document.getElementById('btn-clear');
 const fileUpload = document.getElementById('file-upload');
@@ -65,6 +69,10 @@ const I18N = {
   ko: {
     heroTitle: '경쟁사 부정 리뷰를 정밀 분석하여<br><span class="gradient-text">품질 개선 스펙과 구매 전환 카피</span>를 도출합니다',
     heroSub: '아마존, 쿠팡, 쇼피파이의 1~3점 리뷰 데이터를 즉시 구조화합니다.<br>소비자가 환불하는 5대 핵심 결함과 고객의 미충족 니즈, 고효율 광고 소구점을 100% 클라이언트 환경에서 도출합니다.',
+    inputTitle: '스마트 리뷰 입력 & 자동 정제 (Smart Input)',
+    inputHint: '쿠팡·아마존 화면 통째 드래그, 엑셀 표(TSV), CSV 파일 드롭 자동 정제 지원',
+    pasteBtn: '클립보드에서 가져오기',
+    uploadLabel: 'CSV / 파일 불러오기',
     analyzeBtn: '인텔리전스 분석 시작',
     extBtn: 'Extension (.zip)',
     proBtn: 'Upgrade to PRO ($14.99/mo)',
@@ -76,6 +84,10 @@ const I18N = {
   en: {
     heroTitle: 'Analyze Competitor Negative Reviews to Mine<br><span class="gradient-text">Product Specs & High-Converting Copy</span>',
     heroSub: 'Structure raw 1-3 star reviews from Amazon, Coupang, and Shopify in seconds.<br>Identify top return drivers, unmet desires, and proven copy angles in 100% client-side privacy.',
+    inputTitle: 'Smart Review Input & Auto-Cleaning',
+    inputHint: 'Supports raw Coupang/Amazon page dragging, Excel/Sheets tables (TSV), and CSV drops',
+    pasteBtn: 'Paste from Clipboard',
+    uploadLabel: 'Import CSV / File',
     analyzeBtn: 'Run Review Intelligence',
     extBtn: 'Extension (.zip)',
     proBtn: 'Upgrade to PRO ($14.99/mo)',
@@ -126,11 +138,77 @@ function setupEventListeners() {
   // Analyze Button
   btnAnalyze.addEventListener('click', runAnalysis);
 
+  // Realtime Input Stats
+  reviewInput.addEventListener('input', updateInputStats);
+
+  // Paste from Clipboard Button
+  if (btnPasteClipboard) {
+    btnPasteClipboard.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (!text || !text.trim()) {
+          showToast(currentLang === 'ko' ? '클립보드에 복사된 텍스트가 없습니다.' : 'Clipboard is empty.', 'error');
+          return;
+        }
+        reviewInput.value = text;
+        updateInputStats();
+        runAnalysis(false);
+        showToast(currentLang === 'ko' ? '클립보드 내용을 붙여넣고 분석을 시작했습니다.' : 'Pasted from clipboard and analyzed.');
+      } catch (err) {
+        reviewInput.focus();
+        showToast(currentLang === 'ko' ? '브라우저 권한으로 인해 클립보드 직접 읽기가 제한되었습니다. Ctrl+V (또는 Cmd+V)를 사용하세요.' : 'Clipboard access denied by browser. Please use Ctrl+V / Cmd+V.');
+      }
+    });
+  }
+
+  // Drag and Drop Zone on Input Card
+  if (inputBody) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+      inputBody.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        inputBody.classList.add('drag-active');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      inputBody.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        inputBody.classList.remove('drag-active');
+      });
+    });
+
+    inputBody.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt && dt.files;
+      if (files && files.length > 0) {
+        const file = files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          reviewInput.value = event.target.result;
+          updateInputStats();
+          runAnalysis(false);
+          showToast(currentLang === 'ko' ? `${file.name} 파일을 로드하여 정제 분석했습니다.` : `Loaded and analyzed ${file.name}.`);
+        };
+        reader.readAsText(file);
+      } else if (dt) {
+        const text = dt.getData('text');
+        if (text) {
+          reviewInput.value = text;
+          updateInputStats();
+          runAnalysis(false);
+        }
+      }
+    });
+  }
+
   // Clear Button
   btnClear.addEventListener('click', () => {
     reviewInput.value = '';
     resultsPanel.style.display = 'none';
     currentReport = null;
+    updateInputStats();
   });
 
   // File Upload
@@ -177,6 +255,28 @@ function setupEventListeners() {
   btnActivateLicense.addEventListener('click', handleLicenseActivation);
 }
 
+function updateInputStats() {
+  if (!reviewInput || !inputStatsBadge || !inputStatsText) return;
+  const val = reviewInput.value;
+  if (!val || !val.trim()) {
+    inputStatsBadge.style.display = 'none';
+    return;
+  }
+  const { stats } = parseReviewsWithStats(val);
+  if (stats.validReviews > 0) {
+    inputStatsBadge.style.display = 'inline-flex';
+    if (currentLang === 'ko') {
+      const noiseText = stats.noiseLinesFiltered > 0 ? `, 노이즈 ${stats.noiseLinesFiltered}줄 정제` : '';
+      inputStatsText.textContent = `유효 리뷰 ${stats.validReviews}건 감지 (${stats.detectedFormat}${noiseText})`;
+    } else {
+      const noiseText = stats.noiseLinesFiltered > 0 ? `, ${stats.noiseLinesFiltered} noise lines filtered` : '';
+      inputStatsText.textContent = `${stats.validReviews} valid reviews (${stats.detectedFormat}${noiseText})`;
+    }
+  } else {
+    inputStatsBadge.style.display = 'none';
+  }
+}
+
 function switchLanguage(lang) {
   currentLang = lang;
   if (lang === 'ko') {
@@ -190,9 +290,14 @@ function switchLanguage(lang) {
   const dict = I18N[lang];
   document.getElementById('t-hero-title').innerHTML = dict.heroTitle;
   document.getElementById('t-hero-subtitle').innerHTML = dict.heroSub;
+  document.getElementById('t-input-title').textContent = dict.inputTitle;
+  document.getElementById('t-input-hint').textContent = dict.inputHint;
+  document.getElementById('t-paste-btn').textContent = dict.pasteBtn;
+  document.getElementById('t-upload-label').textContent = dict.uploadLabel;
   document.getElementById('t-analyze-btn').textContent = dict.analyzeBtn;
   document.getElementById('t-ext-btn').textContent = dict.extBtn;
   updateLicenseUI();
+  updateInputStats();
   showToast(lang === 'ko' ? '한국어로 전환되었습니다.' : 'Switched to English.');
 }
 
@@ -203,6 +308,7 @@ function loadPreset(key, isAuto = false) {
     btn.classList.toggle('active', btn.dataset.preset === key);
   });
   reviewInput.value = preset.reviews.join('\n\n');
+  updateInputStats();
   runAnalysis(isAuto);
 }
 
@@ -213,6 +319,7 @@ function handleFileUpload(e) {
   const reader = new FileReader();
   reader.onload = (event) => {
     reviewInput.value = event.target.result;
+    updateInputStats();
     runAnalysis(false);
     showToast(currentLang === 'ko' ? `${file.name} 파일을 성공적으로 불러왔습니다.` : `Loaded ${file.name} successfully.`);
   };
